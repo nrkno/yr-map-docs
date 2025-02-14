@@ -1,0 +1,22 @@
+---
+interface Props {
+  size?: 'default' | 'large';
+}
+
+const { size = 'default' } = Astro.props;
+---
+
+<div class={`divider divider--${size}`}></div>
+<style lang="scss">
+  .divider {
+    border-top: 1px solid lightgrey;
+  }
+
+  .divider--default {
+    margin: size(2) 0;
+  }
+
+  .divider--large {
+    margin: size(4) 0;
+  }
+</style>

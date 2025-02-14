@@ -1,0 +1,57 @@
+---
+import Image from 'astro/components/Image.astro';
+import background from '../../../public/background.webp';
+import WindExample from '../../components/WindExample/WindExample.astro';
+import Main from '../../layouts/Main.astro';
+// import temperature from './temperature.png';
+---
+
+<Main>
+  <WindExample />
+</Main>
+
+<Image id="map-image" class="map-image" src={background} alt="Background tile" data-loaded="false" loading="eager" />
+
+<script is:inline async>
+  async function updateImageElementLoadedAttribute(id) {
+    return new Promise((resolve, reject) => {
+      const image = document.getElementById(id);
+
+      console.log('Image:', image);
+
+      // When fetching e.g. the precipitation images from MET's servers we need to set "crossorigin" to "anonymous"
+      // so we can read the image's pixels in our shader.
+      // See https://developer.mozilla.org/en-US/docs/web/html/attributes/crossorigin
+      // image.crossOrigin = 'anonymous';
+
+      image.onload = () => {
+        // Set data-loaded='true' when the image has loaded
+        image.dataset.loaded = 'true';
+        resolve();
+      };
+
+      image.onerror = reject;
+    });
+  }
+
+  // This will set data-loaded to true when image is loaded
+  const updateImagePromises = [
+    updateImageElementLoadedAttribute('map-image'),
+    updateImageElementLoadedAttribute('wind-data-image'),
+    updateImageElementLoadedAttribute('temperature-data-image'),
+  ];
+
+  Promise.allSettled(updateImagePromises).then(() => {
+    console.log('All images loaded');
+  });
+</script>
+
+<style>
+  .map-image {
+    opacity: 0;
+    position: absolute;
+    /* pointer-events: none; */
+    width: 0;
+    height: 0;
+  }
+</style>

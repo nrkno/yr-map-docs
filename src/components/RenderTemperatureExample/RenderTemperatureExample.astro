@@ -1,0 +1,96 @@
+<script>
+  import { resizeCanvas } from '../../helpers/canvas';
+  import { createColorCanvas } from '../../helpers/colors';
+  import { BlendImagesProgram } from '../../programs/BlendImagesProgram/BlendImagesProgram';
+  import genericVertexShader from './shaders/GenericVertexShader.vert.glsl';
+  import renderRawTemperatureData from './shaders/RenderRawTemperatureData.frag.glsl';
+  import renderTemperatureDataByTemperatureSpeed from './shaders/RenderTemperatureDataWithColorFromTexture.frag.glsl';
+
+  const mapImage = document.getElementById('map-image');
+  if (mapImage instanceof HTMLImageElement === false) {
+    throw new Error('Image not found');
+  }
+
+  const temperatureDataImage = document.getElementById('temperature-data-image');
+  if (temperatureDataImage instanceof HTMLImageElement === false) {
+    throw new Error('Image not found');
+  }
+
+  // In index.ts we are calling updateImageElementLoadedAttribute for each image
+  // Instead of complicating it with a MutationObserver for each image, we do a check every available animation frame, and when both images are loaded, we start the WebGL rendering
+  function handleRequestAnimationFrame(mapImage: HTMLImageElement, temperatureDataImage: HTMLImageElement) {
+    if (mapImage.dataset.loaded === 'true' && temperatureDataImage.dataset.loaded === 'true') {
+      const temperatureDataCanvas = document.getElementById('temperature-canvas');
+      const temperatureExampleCanvas = document.getElementById('temperature-example-canvas');
+
+      if (
+        temperatureDataCanvas instanceof HTMLCanvasElement === false ||
+        temperatureExampleCanvas instanceof HTMLCanvasElement === false
+      ) {
+        throw new Error('Canvas not found');
+      }
+
+      resizeCanvas({
+        canvas: temperatureDataCanvas,
+        width: temperatureDataImage.naturalWidth,
+        height: temperatureDataImage.naturalHeight,
+      });
+
+      resizeCanvas({
+        canvas: temperatureExampleCanvas,
+        width: temperatureDataImage.naturalWidth,
+        height: temperatureDataImage.naturalHeight,
+      });
+
+      const temperatureColorGradientCanvas = createColorCanvas({
+        type: 'temperature',
+        parentElement: temperatureExampleCanvas,
+      });
+
+      const temperatureDataWebGLContext = temperatureDataCanvas.getContext('webgl');
+      const temperatureExampleWebGLContext = temperatureExampleCanvas.getContext('webgl');
+
+      if (!temperatureDataWebGLContext || !temperatureExampleWebGLContext) {
+        throw new Error('WebGL not supported');
+      }
+
+      const temperatureDataAttributes = temperatureDataCanvas.dataset;
+      const temperatureExampleAttribues = temperatureExampleCanvas.dataset;
+      if (
+        temperatureDataAttributes.initialIndex === undefined ||
+        typeof temperatureDataAttributes.initialIndex !== 'string' ||
+        temperatureExampleAttribues.initialIndex === undefined ||
+        typeof temperatureExampleAttribues.initialIndex !== 'string'
+      ) {
+        throw new Error('Initial index not found');
+      }
+
+      // Webgl program used for rendering raw temperature data on top of a background tile
+      const temperatureDataProgram = new BlendImagesProgram({
+        gl: temperatureDataWebGLContext,
+        mapImage,
+        dataImage: temperatureDataImage,
+        fragmentShaderSource: renderRawTemperatureData,
+        vertexShaderSource: genericVertexShader,
+        initialIndex: parseInt(temperatureDataAttributes.initialIndex),
+      });
+
+      const temperatureExampleProgram = new BlendImagesProgram({
+        gl: temperatureExampleWebGLContext,
+        mapImage,
+        dataImage: temperatureDataImage,
+        colorGradientCanvas: temperatureColorGradientCanvas,
+        fragmentShaderSource: renderTemperatureDataByTemperatureSpeed,
+        vertexShaderSource: genericVertexShader,
+        initialIndex: parseInt(temperatureExampleAttribues.initialIndex),
+      });
+
+      temperatureDataProgram.draw(temperatureDataWebGLContext);
+      temperatureExampleProgram.draw(temperatureExampleWebGLContext);
+      return;
+    }
+
+    window.requestAnimationFrame(handleRequestAnimationFrame.bind(null, mapImage, temperatureDataImage));
+  }
+  handleRequestAnimationFrame(mapImage, temperatureDataImage);
+</script>

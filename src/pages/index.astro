@@ -1,11 +1,104 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Image from 'astro/components/Image.astro';
+import temperature from '../../public/temperature.webp';
+import wind from '../../public/wind.webp';
+import Main from '../layouts/Main.astro';
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<Main>
+  <section class="intro-section">
+    <h1>Documentation on Using Tile Data from MET</h1>
+    <p>
+      This documentation provides examples of how to use WebGL shaders to visualize temperature and wind data fetched
+      from a tile server. Each example demonstrates the process of rendering the data using static images and WebGL
+      shaders.
+    </p>
+  </section>
+
+  <section class="examples-section">
+    <div class="example">
+      <a href={`${import.meta.env.BASE_URL}/wind`}>
+        <div class="example-content">
+          <Image src={wind} alt="Wind Example" loading="eager" />
+          <h2>Wind</h2>
+        </div>
+      </a>
+    </div>
+
+    <div class="example">
+      <a href={`${import.meta.env.BASE_URL}/temperature`}>
+        <div class="example-content">
+          <Image src={temperature} alt="Temperature Example" loading="eager" />
+          <h2>Temperature</h2>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <style is:global>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      margin: 0;
+    }
+
+    .intro-section {
+      margin-bottom: 40px;
+    }
+
+    .examples-section {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .example {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .example-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 2px solid lightgrey;
+      outline: 1px solid transparent;
+      border-radius: 12px;
+
+      overflow: hidden;
+      width: 300px;
+      position: relative;
+
+      &:hover {
+        border-width: 2px;
+        border-color: darkgrey;
+        outline-color: darkgrey;
+      }
+    }
+
+    .example-content img {
+      height: 150px;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    .example h2 {
+      margin: 16px 0;
+    }
+
+    .example a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .example a:hover h2 {
+      color: blue;
+      text-decoration: underline;
+    }
+  </style>
+</Main>

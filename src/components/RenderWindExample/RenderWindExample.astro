@@ -1,0 +1,99 @@
+<script>
+  import { resizeCanvas } from '../../helpers/canvas';
+  import { createColorCanvas } from '../../helpers/colors';
+  import { BlendImagesProgram } from '../../programs/BlendImagesProgram/BlendImagesProgram';
+  import genericVertexShader from './shaders/GenericVertexShader.vert.glsl';
+  import renderRawWindData from './shaders/RenderRawWindData.frag.glsl';
+  import renderWindDataByWindSpeed from './shaders/RenderWindDataByWindSpeed.frag.glsl';
+
+  const mapImage = document.getElementById('map-image');
+  if (mapImage instanceof HTMLImageElement === false) {
+    throw new Error('Image not found');
+  }
+
+  const windDataImage = document.getElementById('wind-data-image');
+  if (windDataImage instanceof HTMLImageElement === false) {
+    throw new Error('Image not found');
+  }
+
+  //   TODO(AS): Possible working solution, allthough not the prettiest, if we use requestAnimationFrame to wait untill data-loaded is true on the images, we can initialize the gl context + programs etc.
+  // In index.ts we are calling updateImageElementLoadedAttribute for each image
+  // Instead of complicating it with a MutationObserver for each image, we do a check every available animation frame, and when both images are loaded, we start the WebGL rendering
+  function handleRequestAnimationFrame(mapImage: HTMLImageElement, windDataImage: HTMLImageElement) {
+    if (mapImage.dataset.loaded === 'true' && windDataImage.dataset.loaded === 'true') {
+      const windDataCanvas = document.getElementById('wind-canvas');
+      const windExampleCanvas = document.getElementById('wind-example-canvas');
+
+      if (
+        windDataCanvas instanceof HTMLCanvasElement === false ||
+        windExampleCanvas instanceof HTMLCanvasElement === false
+      ) {
+        throw new Error('Canvas not found');
+      }
+      resizeCanvas({
+        canvas: windDataCanvas,
+        width: windDataImage.naturalWidth,
+        height: windDataImage.naturalHeight,
+      });
+
+      resizeCanvas({
+        canvas: windExampleCanvas,
+        width: windDataImage.naturalWidth,
+        height: windDataImage.naturalHeight,
+      });
+
+      const windColorGradientCanvas = createColorCanvas({ type: 'wind', parentElement: windExampleCanvas });
+
+      const windDataWebGLContext = windDataCanvas.getContext('webgl');
+      const windExampleWebGLContext = windExampleCanvas.getContext('webgl');
+
+      if (!windDataWebGLContext || !windExampleWebGLContext) {
+        throw new Error('WebGL not supported');
+      }
+
+      const windDataAttributes = windDataCanvas.dataset;
+      const windExampleAttribues = windExampleCanvas.dataset;
+      if (
+        windDataAttributes.initialIndex === undefined ||
+        typeof windDataAttributes.initialIndex !== 'string' ||
+        windExampleAttribues.initialIndex === undefined ||
+        typeof windExampleAttribues.initialIndex !== 'string'
+      ) {
+        throw new Error('Initial index not found');
+      }
+
+      // Webgl program used for rendering raw wind data on top of a background tile
+      const windDataProgram = new BlendImagesProgram({
+        gl: windDataWebGLContext,
+        mapImage,
+        dataImage: windDataImage,
+        fragmentShaderSource: renderRawWindData,
+        vertexShaderSource: genericVertexShader,
+        initialIndex: parseInt(windDataAttributes.initialIndex),
+      });
+
+      const windExampleProgram = new BlendImagesProgram({
+        gl: windExampleWebGLContext,
+        mapImage: mapImage,
+        dataImage: windDataImage,
+        colorGradientCanvas: windColorGradientCanvas,
+        fragmentShaderSource: renderWindDataByWindSpeed,
+        vertexShaderSource: genericVertexShader,
+        initialIndex: parseInt(windExampleAttribues.initialIndex),
+      });
+
+      // We add an extra uniform to the program to control the maximum speed of the wind data
+      windExampleWebGLContext.useProgram(windExampleProgram.program);
+      windExampleWebGLContext.uniform1f(windExampleProgram.getUniform('uMaxSpeed'), (255 - 128) / 2);
+      windExampleWebGLContext.useProgram(null);
+
+      windDataProgram.draw(windDataWebGLContext);
+
+      windExampleProgram.draw(windExampleWebGLContext);
+      return;
+    }
+    window.requestAnimationFrame(handleRequestAnimationFrame.bind(null, mapImage, windDataImage));
+  }
+
+  handleRequestAnimationFrame(mapImage, windDataImage);
+</script>

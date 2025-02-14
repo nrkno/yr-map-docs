@@ -1,48 +1,58 @@
-# Astro Starter Kit: Basics
+# Documentation on Using Tile Data from MET
 
-```sh
-npm create astro@latest -- --template basics
-```
+This repository documents how we use tile server data from MET to visualize temperature and wind data using WebGL shaders. The site is deployed at [https://nrkno.github.io/yr-map-docs/](https://nrkno.github.io/yr-map-docs/).
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+You are welcome to clone this repo locally if you want, just follow the guide at the bottom of this page.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Overview
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
+We demonstrate how to:
 
-## 🚀 Project Structure
+- Display raw data fetched from a tile server.
+- Use shaders to read from the tile images and render both raw data and data using our own color gradient.
 
-Inside of your Astro project, you'll see the following folders and files:
+## Examples
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+### Wind Example
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+- Shows how to visualize wind data using WebGL shaders.
+- Demonstrates the process of rendering raw wind data and applying a custom color gradient.
 
-## 🧞 Commands
+If you want to play around with the shaders for the wind example you can see them in the [shaders folder](./src/components/RenderWindExample/shaders/). The code for setting up the WebGL context is in the [RenderWindExample](./src/components/RenderWindExample/RenderWindExample.astro) component.
 
-All commands are run from the root of the project, from a terminal:
+### Temperature Example
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+- Shows how to visualize temperature data using WebGL shaders.
+- Demonstrates the process of rendering raw temperature data and applying a custom color gradient.
 
-## 👀 Want to learn more?
+If you want to play around with the shaders for the temperature example you can see them in the [shaders folder](./src/components/RenderTemperatureExample/shaders/). The code for setting up the WebGL context is in the [RenderTemperatureExample](./src/components/RenderTemperatureExample/RenderTemperatureExample.astro) component.
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## Custom NPM script
+
+In addition to the boilerplate scripts we get from using Astro as a framework, we have added a script called `generate-static-tile`. This will use the [options](./scripts/options.ts) to generate one static tile covering the defined bounds, using the specified zoom-level.
+
+**We will not** provide raster tiles for the background, so if you want to play around with this code using different bounds or zoom levels - you need to find or set up your own raster tile server. Please note that if you are doing that, the result will not look the same, because of the way we are multiplying the color with the background. In these heatmap examples the background layer should be as white as possible, with the exception of borders wich should be darkgrey/black.
+
+The output paths are defined in [options](./scripts/options.ts) aswell - and is currently set to the `public` folder that is used by Astro.
+
+## Run the docs locally
+
+1. Clone the repository:
+
+`git clone https://github.com/nrkno/yr-map-docs.git`
+
+2. Install dependencies
+
+`npm install`
+
+3. Run dev server
+
+`npm run dev`
+
+## Run production/build
+
+`npm run build`
+
+`npm run preview`
+
+When server is running you will see at wich port it is available on.
