@@ -1,0 +1,123 @@
+<!DOCTYPE html><style>body{font-size:16px;color:#00050e;font-family:sans-serif;font-weight:400;blockquote{font-size:13px;padding:10px;border-radius:10px;background-color:#f9f9f9;border:1px solid #00050e}span{font-size:12px}}.main[data-astro-cid-hsp6otuf]{margin:0 15%}
+.wind-section[data-astro-cid-wizpvydl]{padding-bottom:30px}.wind-example[data-astro-cid-wizpvydl]{display:grid;text-align:start}.wind-example[data-astro-cid-wizpvydl] img[data-astro-cid-wizpvydl],.wind-example[data-astro-cid-wizpvydl] canvas[data-astro-cid-wizpvydl]{border:1px solid lightgray;margin:8px 0;justify-self:center}.wind-example-item[data-astro-cid-wizpvydl]{display:grid;grid-template-rows:1fr;justify-items:center;gap:16px}pre{padding:16px}.map-image[data-astro-cid-4kaugfx7]{opacity:0;position:absolute;width:0;height:0}
+.divider[data-astro-cid-g2vovh5f]{border-top:1px solid lightgrey}.divider--default[data-astro-cid-g2vovh5f]{margin:size(2) 0}.divider--large[data-astro-cid-g2vovh5f]{margin:size(4) 0}
+</style><body data-astro-cid-hsp6otuf> <div class="main" data-astro-cid-hsp6otuf>  <section class="wind-section" data-astro-cid-wizpvydl> <h1 data-astro-cid-wizpvydl>Wind</h1> <p data-astro-cid-wizpvydl>
+These examples are simplified, using only static images created from tiles for some given bounds. We are not implementing it in a map context; we are simply showing examples of how to read and use the data using WebGL shaders.
+</p> <div class="divider divider--default" data-astro-cid-g2vovh5f></div>  <h2 data-astro-cid-wizpvydl>Wind data</h2> <div class="wind-example" data-astro-cid-wizpvydl> <p data-astro-cid-wizpvydl>
+Wind data is fetched from a tile server that contains XYZ tiles with wind data. The data is then used to create a wind map using WebGL. To simplify the example, we are using a static image of the wind data and a static image of the map background. The image below consists of four tiles of wind data, stitched together to create a larger image. In the next example, we will use WebGL to render this data together with our background map.
+</p> <img src="/yr-map-docs/assets/wind.BtvcsfcK_1Vxa26.webp" id="wind-data-image" alt="Raw wind data from tile server" loading="eager" data-astro-cid-wizpvydl="true" width="512" height="512" decoding="async"> <div class="divider divider--default" data-astro-cid-g2vovh5f></div>  <h2 data-astro-cid-wizpvydl>Render raw wind data with WebGL</h2> <p data-astro-cid-wizpvydl>
+Setting up WebGL demands some boilerplate code, which we will not provide in these simplified examples. If you are unfamiliar with WebGL, we recommend visiting <a href="https://webglfundamentals.org/" data-astro-cid-wizpvydl>WebGL Fundamentals</a> to get a grasp of the basics. After creating a canvas element and setting up the WebGL context, we can start creating our shaders.
+</p> <h3 data-astro-cid-wizpvydl>Vertex shader</h3> <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-astro-cid-wizpvydl data-language="glsl"><code><span class="line"><span style="color:#F97583">attribute</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> aPosition;</span></span>
+<span class="line"><span style="color:#F97583">attribute</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> aTexCoords;</span></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> uResolution;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">varying</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> vTexCoord;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> main</span><span style="color:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D">   // Get a normalized position based on the resolution and the position of the vertex</span></span>
+<span class="line"><span style="color:#E1E4E8">   vec2 normalizedPosition </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> aPosition </span><span style="color:#F97583">/</span><span style="color:#E1E4E8"> uResolution;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">   // In WebGL the vertex shader transforms vertices into what is called clip space</span></span>
+<span class="line"><span style="color:#6A737D">   // The clip space goes from -1 to 1 in both x and y</span></span>
+<span class="line"><span style="color:#E1E4E8">   vec2 positionInClipSpace </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> (normalizedPosition </span><span style="color:#F97583">*</span><span style="color:#79B8FF"> 2.0</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">-</span><span style="color:#79B8FF">1.0</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">   // Update the varying variable vTexCoord (containing texture coordinates)</span></span>
+<span class="line"><span style="color:#E1E4E8">   vTexCoord </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> aTexCoords;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">   gl_Position </span><span style="color:#F97583">=</span><span style="color:#B392F0"> vec4</span><span style="color:#E1E4E8">(positionInClipSpace, </span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre> <p data-astro-cid-wizpvydl>A simple vertex shader whose sole purpose is to provide our fragment shader with the texture coordinates.</p> <h3 data-astro-cid-wizpvydl>Fragment shader</h3> <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-astro-cid-wizpvydl data-language="glsl"><code><span class="line"><span style="color:#E1E4E8">precision mediump </span><span style="color:#F97583">float</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uDataTexture;</span><span style="color:#6A737D"> // Texture containing the wind data</span></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uMapTexture;</span><span style="color:#6A737D"> // Texture containing the background map</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">varying</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> vTexCoord;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> main</span><span style="color:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D">      // Calling texture2D to get the color of the wind data and the background map</span></span>
+<span class="line"><span style="color:#E1E4E8">      vec4 windDataColor </span><span style="color:#F97583">=</span><span style="color:#B392F0"> texture2D</span><span style="color:#E1E4E8">(uDataTexture, vTexCoord);</span></span>
+<span class="line"><span style="color:#E1E4E8">      vec4 mapTextureColor </span><span style="color:#F97583">=</span><span style="color:#B392F0"> texture2D</span><span style="color:#E1E4E8">(uMapTexture, vTexCoord);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">      // Blend the colors by multiplying them</span></span>
+<span class="line"><span style="color:#E1E4E8">      gl_FragColor </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> windDataColor </span><span style="color:#F97583">*</span><span style="color:#E1E4E8"> mapTextureColor;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre> <p data-astro-cid-wizpvydl>
+The fragment shader gets the texture coordinates (vTexCoord) to look up which color this coordinate represents in both the wind data and our background map. As a simple way of blending these colors, we multiply them by each other.
+</p> <h3 data-astro-cid-wizpvydl>Output</h3> <p data-astro-cid-wizpvydl>This is the result that is drawn to our canvas element.</p> <canvas id="wind-canvas" data-initial-index="1" data-astro-cid-wizpvydl></canvas> <h2 data-astro-cid-wizpvydl>Applying our own color gradient</h2> <p data-astro-cid-wizpvydl>
+The raw data is not easily readable for humans, as it only contains dimensions for a directional vector stored in the R and G channels of the image. To make it more readable, we need to make some changes in the fragment shader. The vertex shader will remain the same.
+</p> <p id="wind-example-text" data-astro-cid-wizpvydl>But first, we can create the gradient we want to use.</p> <p data-astro-cid-wizpvydl>We don't need to render this gradient to the screen; it is simply done to visualize the example.</p> <h3 data-astro-cid-wizpvydl>Fragment shader changes</h3> <p data-astro-cid-wizpvydl>
+To read the color from the gradient instead of just using the raw data, we have added <code class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-astro-cid-wizpvydl data-language="glsl"><span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uColorGradientTexture</span></span></code>, <code class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-astro-cid-wizpvydl data-language="glsl"><span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> float</span><span style="color:#E1E4E8"> uMaxSpeed</span></span></code>, and the function <code class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-astro-cid-wizpvydl data-language="glsl"><span class="line"><span style="color:#F97583">vec2</span><span style="color:#B392F0"> getDirectionFromWindData</span><span style="color:#E1E4E8">(vec4 </span><span style="color:#FFAB70">windData</span><span style="color:#E1E4E8">)</span></span></code> to help us achieve this.
+</p> <p data-astro-cid-wizpvydl>
+As briefly mentioned, the wind data only contains a directional vector, stored in the R and G channels of the image. So in this example, we first get the direction of the wind, then calculate the length of the vector to get the speed. We then normalize the speed and use it as a lookup in our color gradient. The color gradient moves from left to right, so we send the normalized speed as the x value.
+</p> <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-astro-cid-wizpvydl data-language="glsl"><code><span class="line"><span style="color:#E1E4E8">precision mediump </span><span style="color:#F97583">float</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uDataTexture;</span><span style="color:#6A737D"> // Our wind data</span></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uMapTexture;</span><span style="color:#6A737D"> // Our background map</span></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uColorGradientTexture;</span><span style="color:#6A737D"> // Our color gradient</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> float</span><span style="color:#E1E4E8"> uMaxSpeed;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">varying</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> vTexCoord;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// This function takes the wind data and returns a direction vector</span></span>
+<span class="line"><span style="color:#F97583">vec2</span><span style="color:#B392F0"> getDirectionFromWindData</span><span style="color:#E1E4E8">(vec4 </span><span style="color:#FFAB70">windData</span><span style="color:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#F97583">  return</span><span style="color:#B392F0"> vec2</span><span style="color:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#E1E4E8">    (windData.r </span><span style="color:#F97583">*</span><span style="color:#79B8FF"> 255.0</span><span style="color:#F97583"> -</span><span style="color:#79B8FF"> 128.0</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">/</span><span style="color:#79B8FF"> 2.0</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E1E4E8">    (windData.g </span><span style="color:#F97583">*</span><span style="color:#79B8FF"> 255.0</span><span style="color:#F97583"> -</span><span style="color:#79B8FF"> 128.0</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">/</span><span style="color:#79B8FF"> 2.0</span></span>
+<span class="line"><span style="color:#E1E4E8">  );</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> main</span><span style="color:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D">      // Getting wind data from the wind data texture, and getting the color from the backgroundmap texture</span></span>
+<span class="line"><span style="color:#E1E4E8">      vec4 windDataColor </span><span style="color:#F97583">=</span><span style="color:#B392F0"> texture2D</span><span style="color:#E1E4E8">(uDataTexture, vTexCoord);</span></span>
+<span class="line"><span style="color:#E1E4E8">      vec4 mapTextureColor </span><span style="color:#F97583">=</span><span style="color:#B392F0"> texture2D</span><span style="color:#E1E4E8">(uMapTexture, vTexCoord);</span></span>
+<span class="line"><span style="color:#E1E4E8">        </span></span>
+<span class="line"><span style="color:#6A737D">      // Calling getDirectionFromWindData to get the direction of the wind, in form of a vector</span></span>
+<span class="line"><span style="color:#E1E4E8">      vec2 direction </span><span style="color:#F97583">=</span><span style="color:#B392F0"> getDirectionFromWindData</span><span style="color:#E1E4E8">(windDataColor);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">      // Calculating the length of the vector, which is the speed of the wind</span></span>
+<span class="line"><span style="color:#F97583">      float</span><span style="color:#E1E4E8"> speed </span><span style="color:#F97583">=</span><span style="color:#B392F0"> sqrt</span><span style="color:#E1E4E8">((direction.x </span><span style="color:#F97583">*</span><span style="color:#E1E4E8"> direction.x) </span><span style="color:#F97583">+</span><span style="color:#E1E4E8"> (direction.y </span><span style="color:#F97583">*</span><span style="color:#E1E4E8"> direction.y));</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">      // Normalizing the speed to be between 0 and 1, so we can use it as a lookup in our color gradient</span></span>
+<span class="line"><span style="color:#F97583">      float</span><span style="color:#E1E4E8"> normalizedSpeed </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> speed </span><span style="color:#F97583">/</span><span style="color:#E1E4E8"> uMaxSpeed;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">      // In this example the color gradient is moving from left to right, so we send the normalized speed as the x value.</span></span>
+<span class="line"><span style="color:#E1E4E8">      vec4 windColor </span><span style="color:#F97583">=</span><span style="color:#B392F0"> texture2D</span><span style="color:#E1E4E8">(uColorGradientTexture, </span><span style="color:#B392F0">vec2</span><span style="color:#E1E4E8">(normalizedSpeed, </span><span style="color:#79B8FF">0.0</span><span style="color:#E1E4E8">));</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">      // Multiplying the wind color with the background map color</span></span>
+<span class="line"><span style="color:#6A737D">      // This could (and probably should) be done by rendering the wind color on top of the background map,</span></span>
+<span class="line"><span style="color:#6A737D">      // and using a blend func in WebGL</span></span>
+<span class="line"><span style="color:#E1E4E8">      gl_FragColor </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> windColor </span><span style="color:#F97583">*</span><span style="color:#E1E4E8"> mapTextureColor;</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span></code></pre> <h3 data-astro-cid-wizpvydl>Output</h3> <p data-astro-cid-wizpvydl>
+After making these changes to the fragment shader, we can see the color gradient has been rendered in the end result.
+</p> <canvas id="wind-example-canvas" data-initial-index="2" data-astro-cid-wizpvydl></canvas> <div class="divider divider--default" data-astro-cid-g2vovh5f></div>  <!-- RenderWindExample contains the js we need to set up WebGL, and the shaders needed for each example --> <script type="module" src="/yr-map-docs/assets/RenderWindExample.astro_astro_type_script_index_0_lang.CKTfWk6Y.js"></script>   </div> </section>  </div> </body> <img src="/yr-map-docs/assets/background.D9yt5Jgo_PzfOv.webp" id="map-image" alt="Background tile" data-loaded="false" loading="eager" data-astro-cid-4kaugfx7="true" width="512" height="512" decoding="async" class="map-image"> <script async>
+  async function updateImageElementLoadedAttribute(id) {
+    return new Promise((resolve, reject) => {
+      const image = document.getElementById(id);
+
+      console.log('Image:', image);
+
+      // When fetching e.g. the precipitation images from MET's servers we need to set "crossorigin" to "anonymous"
+      // so we can read the image's pixels in our shader.
+      // See https://developer.mozilla.org/en-US/docs/web/html/attributes/crossorigin
+      // image.crossOrigin = 'anonymous';
+
+      image.onload = () => {
+        // Set data-loaded='true' when the image has loaded
+        image.dataset.loaded = 'true';
+        resolve();
+      };
+
+      image.onerror = reject;
+    });
+  }
+
+  // This will set data-loaded to true when image is loaded
+  const updateImagePromises = [
+    updateImageElementLoadedAttribute('map-image'),
+    updateImageElementLoadedAttribute('wind-data-image'),
+    updateImageElementLoadedAttribute('temperature-data-image'),
+  ];
+
+  Promise.allSettled(updateImagePromises).then(() => {
+    console.log('All images loaded');
+  });
+</script> 

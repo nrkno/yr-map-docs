@@ -1,0 +1,108 @@
+<!DOCTYPE html><style>body{font-size:16px;color:#00050e;font-family:sans-serif;font-weight:400;blockquote{font-size:13px;padding:10px;border-radius:10px;background-color:#f9f9f9;border:1px solid #00050e}span{font-size:12px}}.main[data-astro-cid-hsp6otuf]{margin:0 15%}
+.temperature-section[data-astro-cid-s2p3odjf]{padding-bottom:30px}.temperature-example[data-astro-cid-s2p3odjf]{display:grid;text-align:start}.temperature-example[data-astro-cid-s2p3odjf] img[data-astro-cid-s2p3odjf],.temperature-example[data-astro-cid-s2p3odjf] canvas[data-astro-cid-s2p3odjf]{border:1px solid lightgrey;margin:8px 0;justify-self:center}.temperature-example[data-astro-cid-s2p3odjf] canvas[data-astro-cid-s2p3odjf]{transform:scaleX(-1) rotate(180deg)}.temperature-example-item[data-astro-cid-s2p3odjf]{display:grid;grid-template-rows:1fr;justify-items:center;gap:16px}pre{padding:16px}.map-image[data-astro-cid-zgdjerqt]{opacity:0;position:absolute;width:0;height:0}
+.divider[data-astro-cid-g2vovh5f]{border-top:1px solid lightgrey}.divider--default[data-astro-cid-g2vovh5f]{margin:size(2) 0}.divider--large[data-astro-cid-g2vovh5f]{margin:size(4) 0}
+</style><body data-astro-cid-hsp6otuf> <div class="main" data-astro-cid-hsp6otuf>  <section class="temperature-section" data-astro-cid-s2p3odjf> <h1 class="temperature-header" data-astro-cid-s2p3odjf>Temperature</h1> <p data-astro-cid-s2p3odjf>
+This section demonstrates how we use shaders to visualize temperature data. The data is fetched from a tile server and rendered using WebGL shaders.
+</p> <div class="divider divider--default" data-astro-cid-g2vovh5f></div>  <h2 data-astro-cid-s2p3odjf>Temperature data</h2> <div class="temperature-example" data-astro-cid-s2p3odjf> <p data-astro-cid-s2p3odjf>
+The temperature data is fetched from a tile server that provides XYZ tiles with temperature data. To simplify the example, we use a static image of the temperature data and a static image of the map background. The image below consists of multiple tiles stitched together to create a larger image. In the next example, we will use WebGL to render this data together with our background map.
+</p> <img src="/yr-map-docs/assets/temperature.CGkxF1P3_1xCne3.webp" id="temperature-data-image" alt="Temperature" loading="eager" data-astro-cid-s2p3odjf="true" width="512" height="512" decoding="async"> <div class="divider divider--default" data-astro-cid-g2vovh5f></div>  <h2 data-astro-cid-s2p3odjf>Render raw temperature data with WebGL</h2> <p data-astro-cid-s2p3odjf>
+Setting up WebGL requires some boilerplate code, which we will not provide in these simplified examples. If you are unfamiliar with WebGL, we recommend visiting <a href="https://webglfundamentals.org/" data-astro-cid-s2p3odjf>WebGL Fundamentals</a> to get a grasp of the basics. After creating a canvas element and setting up the WebGL context, we can start creating our shaders.
+</p> <h3 data-astro-cid-s2p3odjf>Vertex shader</h3> <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-astro-cid-s2p3odjf data-language="glsl"><code><span class="line"><span style="color:#F97583">attribute</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> aPosition;</span></span>
+<span class="line"><span style="color:#F97583">attribute</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> aTexCoords;</span></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> uResolution;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">varying</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> vTexCoord;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> main</span><span style="color:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D">   // convert the rectangle from pixels to 0.0 to 1.0</span></span>
+<span class="line"><span style="color:#E1E4E8">   vec2 zeroToOne </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> aPosition </span><span style="color:#F97583">/</span><span style="color:#E1E4E8"> uResolution;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">   // convert from 0->1 to 0->2</span></span>
+<span class="line"><span style="color:#E1E4E8">   vec2 zeroToTwo </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> zeroToOne </span><span style="color:#F97583">*</span><span style="color:#79B8FF"> 2.0</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">   // convert from 0->2 to -1->+1 (clipspace)</span></span>
+<span class="line"><span style="color:#E1E4E8">   vec2 clipSpace </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> zeroToTwo </span><span style="color:#F97583">-</span><span style="color:#79B8FF"> 1.0</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">   vTexCoord </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> aTexCoords;</span></span>
+<span class="line"><span style="color:#E1E4E8">   gl_Position </span><span style="color:#F97583">=</span><span style="color:#B392F0"> vec4</span><span style="color:#E1E4E8">(clipSpace </span><span style="color:#F97583">*</span><span style="color:#B392F0"> vec2</span><span style="color:#E1E4E8">(</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">, </span><span style="color:#F97583">-</span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">), </span><span style="color:#79B8FF">0</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">1</span><span style="color:#E1E4E8">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">   // pass the texCoord to the fragment shader</span></span>
+<span class="line"><span style="color:#6A737D">   // The GPU will interpolate this value between points.</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre> <p data-astro-cid-s2p3odjf>
+A simple vertex shader whose sole purpose is to provide our fragment shader with the texture coordinates.
+</p> <h3 data-astro-cid-s2p3odjf>Fragment shader</h3> <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-astro-cid-s2p3odjf data-language="glsl"><code><span class="line"><span style="color:#E1E4E8">precision mediump </span><span style="color:#F97583">float</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// our texture</span></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uDataTexture;</span><span style="color:#6A737D"> // Texture containing the temperature data</span></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uMapTexture;</span><span style="color:#6A737D"> // Texture containing the background map</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">varying</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> vTexCoord;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> main</span><span style="color:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D">      // Calling texture2D to get the color of the temperature data and the background map</span></span>
+<span class="line"><span style="color:#E1E4E8">      vec4 temperatureDataColor </span><span style="color:#F97583">=</span><span style="color:#B392F0"> texture2D</span><span style="color:#E1E4E8">(uDataTexture, vTexCoord);</span></span>
+<span class="line"><span style="color:#E1E4E8">      vec4 mapTextureColor </span><span style="color:#F97583">=</span><span style="color:#B392F0"> texture2D</span><span style="color:#E1E4E8">(uMapTexture, vTexCoord);</span></span>
+<span class="line"><span style="color:#E1E4E8">      </span></span>
+<span class="line"><span style="color:#6A737D">      // Blend the colors by multiplying them</span></span>
+<span class="line"><span style="color:#E1E4E8">      gl_FragColor </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> temperatureDataColor </span><span style="color:#F97583">*</span><span style="color:#E1E4E8">  mapTextureColor;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre> <p data-astro-cid-s2p3odjf>
+The fragment shader gets the texture coordinates (vTexCoord) to look up which color this coordinate represents in both the temperature data and our background map. As a simple way of blending these colors, we multiply them by each other.
+</p> <h3 data-astro-cid-s2p3odjf>Output</h3> <p data-astro-cid-s2p3odjf>This is the result that is drawn to our canvas element.</p> <canvas id="temperature-canvas" data-initial-index="6" data-astro-cid-s2p3odjf></canvas> <h2 data-astro-cid-s2p3odjf>Applying our own color gradient</h2> <p data-astro-cid-s2p3odjf>
+The raw data is not easily readable for humans, as it only contains temperature values stored in the R channel of the image. To make it more readable, we need to make some changes in the fragment shader. The vertex shader will remain the same.
+</p> <p id="temperature-example-text" data-astro-cid-s2p3odjf>Apply a color from our own gradient.</p> <h3 data-astro-cid-s2p3odjf>Fragment shader changes</h3> <p data-astro-cid-s2p3odjf>
+To read the color from the gradient instead of just using the raw data, we have added <code class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-astro-cid-s2p3odjf data-language="glsl"><span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uColorGradientTexture</span></span></code>, and the function <code class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-astro-cid-s2p3odjf data-language="glsl"><span class="line"><span style="color:#F97583">vec2</span><span style="color:#B392F0"> getDirectionFromWindData</span><span style="color:#E1E4E8">(vec4 </span><span style="color:#FFAB70">windData</span><span style="color:#E1E4E8">)</span></span></code> to help us achieve this.
+</p> <pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-astro-cid-s2p3odjf data-language="glsl"><code><span class="line"><span style="color:#E1E4E8">precision mediump </span><span style="color:#F97583">float</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D">// our texture</span></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uDataTexture;</span></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uMapTexture;</span></span>
+<span class="line"><span style="color:#F97583">uniform</span><span style="color:#F97583"> sampler2D</span><span style="color:#E1E4E8"> uColorGradientTexture;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">varying</span><span style="color:#F97583"> vec2</span><span style="color:#E1E4E8"> vTexCoord;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#F97583">void</span><span style="color:#B392F0"> main</span><span style="color:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#6A737D">    // Getting temperature data from the temperature data texture, </span></span>
+<span class="line"><span style="color:#6A737D">    // and getting the color from the backgroundmap texture</span></span>
+<span class="line"><span style="color:#E1E4E8">    vec4 temperatureData </span><span style="color:#F97583">=</span><span style="color:#B392F0"> texture2D</span><span style="color:#E1E4E8">(uDataTexture, vTexCoord);</span></span>
+<span class="line"><span style="color:#E1E4E8">    vec4 mapTextureColor </span><span style="color:#F97583">=</span><span style="color:#B392F0"> texture2D</span><span style="color:#E1E4E8">(uMapTexture, vTexCoord);</span></span>
+<span class="line"><span style="color:#E1E4E8">    </span></span>
+<span class="line"><span style="color:#6A737D">    // In this example the color gradient is moving from left to right, where the color on the</span></span>
+<span class="line"><span style="color:#6A737D">    // far left represents the coldest value and far right the warmest, so we can use the </span></span>
+<span class="line"><span style="color:#6A737D">    // r-value directly since it represents the temperature</span></span>
+<span class="line"><span style="color:#E1E4E8">    vec4 temperatureColor </span><span style="color:#F97583">=</span><span style="color:#B392F0"> texture2D</span><span style="color:#E1E4E8">(uColorGradientTexture, </span><span style="color:#B392F0">vec2</span><span style="color:#E1E4E8">(temperatureData.r, </span><span style="color:#79B8FF">0.0</span><span style="color:#E1E4E8">));</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">    gl_FragColor </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> temperatureColor </span><span style="color:#F97583">*</span><span style="color:#E1E4E8"> mapTextureColor;</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre> <h3 data-astro-cid-s2p3odjf>Output</h3> <p data-astro-cid-s2p3odjf>
+After making these changes to the fragment shader, we can see the color gradient has been rendered in the end result.
+</p> <canvas id="temperature-example-canvas" data-initial-index="9" data-astro-cid-s2p3odjf></canvas> <div class="divider divider--default" data-astro-cid-g2vovh5f></div>  <script type="module" src="/yr-map-docs/assets/RenderTemperatureExample.astro_astro_type_script_index_0_lang.CTI4PRJv.js"></script>   </div> </section>  </div> </body> <img src="/yr-map-docs/assets/background.D9yt5Jgo_PzfOv.webp" id="map-image" alt="Background tile" data-loaded="false" loading="eager" data-astro-cid-zgdjerqt="true" width="512" height="512" decoding="async" class="map-image"> <script async>
+  async function updateImageElementLoadedAttribute(id) {
+    return new Promise((resolve, reject) => {
+      const image = document.getElementById(id);
+
+      console.log('Image:', image);
+
+      // When fetching e.g. the precipitation images from MET's servers we need to set "crossorigin" to "anonymous"
+      // so we can read the image's pixels in our shader.
+      // See https://developer.mozilla.org/en-US/docs/web/html/attributes/crossorigin
+      // image.crossOrigin = 'anonymous';
+
+      image.onload = () => {
+        // Set data-loaded='true' when the image has loaded
+        image.dataset.loaded = 'true';
+        resolve();
+      };
+
+      image.onerror = reject;
+    });
+  }
+
+  // This will set data-loaded to true when image is loaded
+  const updateImagePromises = [
+    updateImageElementLoadedAttribute('map-image'),
+    updateImageElementLoadedAttribute('temperature-data-image'),
+  ];
+
+  Promise.allSettled(updateImagePromises).then(() => {
+    console.log('All images loaded');
+  });
+</script> 
