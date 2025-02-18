@@ -2,20 +2,13 @@
 import { Image } from 'astro:assets';
 import TemperatureExample from '../../components/TemperatureExample/TemperatureExample.astro';
 import Main from '../../layouts/Main.astro';
-import background from '../../../public/background.webp';
+import background from '../../../public/background.png';
 ---
 
 <Main>
-  <TemperatureExample/>
+  <TemperatureExample />
 </Main>
-<Image
-  id="map-image"
-  class="map-image"
-  src={background}
-  alt="Background tile"
-  data-loaded="false"
-  loading="eager"
-/>
+<Image id="map-image" class="map-image" src={background} alt="Background tile" data-loaded="false" loading="eager" />
 
 <script is:inline async>
   async function updateImageElementLoadedAttribute(id) {
@@ -31,6 +24,7 @@ import background from '../../../public/background.webp';
 
       image.onload = () => {
         // Set data-loaded='true' when the image has loaded
+        console.log('Image loaded:', image);
         image.dataset.loaded = 'true';
         resolve();
       };

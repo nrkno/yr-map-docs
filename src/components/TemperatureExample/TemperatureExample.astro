@@ -1,6 +1,6 @@
 ---
 import Image from 'astro/components/Image.astro';
-import temperature from '../../../public/temperature.webp';
+import temperature from '../../../public/temperature.png';
 import RenderTemperatureExample from '../RenderTemperatureExample/RenderTemperatureExample.astro';
 import Divider from '../Divider/Divider.astro';
 import genericVertexShader from '../RenderTemperatureExample/shaders/GenericVertexShader.vert.glsl';
@@ -14,13 +14,17 @@ import { Code } from 'astro:components';
 <section class="temperature-section">
   <h1 class="temperature-header">Temperature</h1>
   <p>
-    This section demonstrates how we use shaders to visualize temperature data. The data is fetched from a tile server and rendered using WebGL shaders.
+    This section demonstrates how we use shaders to visualize temperature data. The data is fetched from a tile server
+    and rendered using WebGL shaders.
   </p>
   <Divider />
   <h2>Temperature data</h2>
   <div class="temperature-example">
     <p>
-      The temperature data is fetched from a tile server that provides XYZ tiles with temperature data. To simplify the example, we use a static image of the temperature data and a static image of the map background. The image below consists of multiple tiles stitched together to create a larger image. In the next example, we will use WebGL to render this data together with our background map.
+      The temperature data is fetched from a tile server that provides XYZ tiles with temperature data. To simplify the
+      example, we use a static image of the temperature data and a static image of the map background. The image below
+      consists of multiple tiles stitched together to create a larger image. In the next example, we will use WebGL to
+      render this data together with our background map.
     </p>
 
     <Image id="temperature-data-image" src={temperature} alt="Temperature" loading="eager" />
@@ -28,17 +32,20 @@ import { Code } from 'astro:components';
     <Divider />
     <h2>Render raw temperature data with WebGL</h2>
     <p>
-      Setting up WebGL requires some boilerplate code, which we will not provide in these simplified examples. If you are unfamiliar with WebGL, we recommend visiting <a href="https://webglfundamentals.org/">WebGL Fundamentals</a> to get a grasp of the basics. After creating a canvas element and setting up the WebGL context, we can start creating our shaders.
+      Setting up WebGL requires some boilerplate code, which we will not provide in these simplified examples. If you
+      are unfamiliar with WebGL, we recommend visiting <a href="https://webglfundamentals.org/">WebGL Fundamentals</a> to
+      get a grasp of the basics. After creating a canvas element and setting up the WebGL context, we can start creating
+      our shaders.
     </p>
     <h3>Vertex shader</h3>
     <Code lang="glsl" code={genericVertexShader.replaceAll('///', '//')} wrap={true} />
-    <p>
-      A simple vertex shader whose sole purpose is to provide our fragment shader with the texture coordinates.
-    </p>
+    <p>A simple vertex shader whose sole purpose is to provide our fragment shader with the texture coordinates.</p>
     <h3>Fragment shader</h3>
     <Code lang="glsl" code={renderRawTemperatureData.replaceAll('///', '//')} wrap={true} />
     <p>
-      The fragment shader gets the texture coordinates (vTexCoord) to look up which color this coordinate represents in both the temperature data and our background map. As a simple way of blending these colors, we multiply them by each other.
+      The fragment shader gets the texture coordinates (vTexCoord) to look up which color this coordinate represents in
+      both the temperature data and our background map. As a simple way of blending these colors, we multiply them by
+      each other.
     </p>
     <h3>Output</h3>
     <p>This is the result that is drawn to our canvas element.</p>
@@ -46,20 +53,28 @@ import { Code } from 'astro:components';
 
     <h2>Applying our own color gradient</h2>
     <p>
-      The raw data is not easily readable for humans, as it only contains temperature values stored in the R channel of the image. To make it more readable, we need to make some changes in the fragment shader. The vertex shader will remain the same.
+      The raw data is not easily readable for humans, as it only contains temperature values stored in the R channel of
+      the image. To make it more readable, we need to make some changes in the fragment shader. The vertex shader will
+      remain the same.
     </p>
 
     <p id="temperature-example-text">Apply a color from our own gradient.</p>
 
     <h3>Fragment shader changes</h3>
     <p>
-      To read the color from the gradient instead of just using the raw data, we have added <Code lang="glsl" code="uniform sampler2D uColorGradientTexture" inline={true} />, and the function <Code lang="glsl" code="vec2 getDirectionFromWindData(vec4 windData)" inline={true} /> to help us achieve this.
+      To read the color from the gradient instead of just using the raw data, we have added <Code
+        lang="glsl"
+        code="uniform sampler2D uColorGradientTexture"
+        inline={true}
+      />, and the function <Code lang="glsl" code="vec2 getDirectionFromWindData(vec4 windData)" inline={true} /> to help
+      us achieve this.
     </p>
     <Code lang="glsl" code={renderTemperatureDataWithColorFromTexture.replaceAll('///', '//')} wrap={true} />
 
     <h3>Output</h3>
     <p>
-      After making these changes to the fragment shader, we can see the color gradient has been rendered in the end result.
+      After making these changes to the fragment shader, we can see the color gradient has been rendered in the end
+      result.
     </p>
     <canvas id="temperature-example-canvas" data-initial-index={INITIAL_TEMPERATURE_INDEX + 4}></canvas>
     <Divider />

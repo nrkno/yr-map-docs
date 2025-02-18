@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "generate-static-tile": "rimraf scripts/temp/**/*.webp && tsx ./scripts/generateStaticResources.ts",
+    "generate-static-tile": "rimraf scripts/temp/**/*.png && tsx ./scripts/generateStaticResources.ts",
     "prebuild": "rimraf dist",
     "build": "astro build",
     "preview": "astro preview",

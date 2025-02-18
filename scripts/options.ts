@@ -9,8 +9,8 @@ const TILE_SIZE = 256;
 // We are not providing a real URL here, so if you want to play around with this code you need to find
 // or build a raster tile server that can provide the tiles for the background.
 const BACKGROUND_URL_TEMPLATE = 'some-raster-tile-server/tiles/{z}/{x}/{y}.png';
-const WIND_SOURCE = 'https://staging.yr-maps.met.no/api/wind/';
-const TEMPERATURE_SOURCE = 'https://staging.yr-maps.met.no/api/air-temperature/';
+const WIND_SOURCE = 'https://beta.yr-maps.met.no/api/wind/';
+const TEMPERATURE_SOURCE = 'https://beta.yr-maps.met.no/api/air-temperature/';
 
 export interface IOptions {
   bounds: { north: number; west: number; south: number; east: number };
@@ -45,19 +45,19 @@ export async function getOptions(): Promise<IOptions> {
     zoomLevel: ZOOM_LEVEL,
     tileSize: TILE_SIZE,
     backgroundTiles: {
-      tempFilePathTemplate: __dirname + '/scripts/temp/backgroundTiles/{z}-{x}-{y}.webp',
+      tempFilePathTemplate: __dirname + '/scripts/temp/backgroundTiles/{z}-{x}-{y}.png',
       urlTemplate: BACKGROUND_URL_TEMPLATE,
-      fileName: __dirname + '/public/background.webp',
+      fileName: __dirname + '/public/background.png',
     },
     windTiles: {
-      tempFilePathTemplate: __dirname + '/scripts/temp/windTiles/{z}-{x}-{y}.webp',
+      tempFilePathTemplate: __dirname + '/scripts/temp/windTiles/{z}-{x}-{y}.png',
       urlTemplate: windUrlTemplate,
-      fileName: __dirname + '/public/wind.webp',
+      fileName: __dirname + '/public/wind.png',
     },
     temperatureTiles: {
-      tempFilePathTemplate: __dirname + '/scripts/temp/temperatureTiles/{z}-{x}-{y}.webp',
+      tempFilePathTemplate: __dirname + '/scripts/temp/temperatureTiles/{z}-{x}-{y}.png',
       urlTemplate: temperatureUrlTemplate,
-      fileName: __dirname + '/public/temperature.webp',
+      fileName: __dirname + '/public/temperature.png',
     },
   };
 }
