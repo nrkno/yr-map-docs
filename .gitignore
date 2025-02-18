@@ -25,5 +25,8 @@ pnpm-debug.log*
 .idea/
 
 # keep temp folder but not the content
-scripts/temp/*
-!scripts/temp/.gitkeep
+
+
+scripts/temp/*/*
+!scripts/temp/*/.gitkeep
+
