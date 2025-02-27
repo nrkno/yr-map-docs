@@ -1,0 +1,28 @@
+---
+import { map } from 'astro:schema';
+import Divider from '../../components/Divider/Divider.astro';
+import Main from '../../layouts/Main.astro';
+import { internalSpreadAttributes } from 'astro/runtime/server/render/util.js';
+---
+
+<Main>
+  <section class="temperature-section">
+    <h1 class="temperature-header">Leaflet example</h1>
+    <p>
+      In this example we are using tiles from the <a href="https: beta.yr-maps.met.no api wind">wind tile server</a> combined
+      with Leaflets GridLayer. The GridLayer enables us to create new tiles that is rendered on top of the map. These tiles
+      are rendered as canvas elements. In the provided example I only use CanvasRenderingContext2D, but I would assume you
+      can use WebGLRenderingContext.
+    </p>
+    <Divider />
+    <iframe
+      height="502"
+      style="width: 100%;"
+      title="Draw raw wind data"
+      src="https://codepen.io/astokke/embed/ZYEpLqa?default-tab=js%2Cresult&editable=true&theme-id=dark"
+      loading="lazy"
+      allowtransparency="true"
+      allowfullscreen="true"></iframe>
+    <a href="https://codepen.io/astokke/pen/ZYEpLqa">See the code at CodePen.</a>
+  </section>
+</Main>

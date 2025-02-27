@@ -13,7 +13,7 @@ import renderWindDataByWindSpeed from '../RenderWindExample/shaders/RenderWindDa
 <section class="wind-section">
   <h1>Wind</h1>
   <p>
-    These examples are simplified, using only static images created from tiles for some given bounds. We are not
+    These examples are simplified, using only static images created from tiles for a given set of bounds. We are not
     implementing it in a map context; we are simply showing examples of how to read and use the data using WebGL
     shaders.
   </p>
@@ -21,10 +21,10 @@ import renderWindDataByWindSpeed from '../RenderWindExample/shaders/RenderWindDa
   <h2>Wind data</h2>
   <div class="wind-example">
     <p>
-      Wind data is fetched from a tile server that contains XYZ tiles with wind data. The data is then used to create a
-      wind map using WebGL. To simplify the example, we are using a static image of the wind data and a static image of
-      the map background. The image below consists of four tiles of wind data, stitched together to create a larger
-      image. In the next example, we will use WebGL to render this data together with our background map.
+      Wind data is fetched from a tile server that provides XYZ tiles containing wind data. The data is then used to
+      create a wind map using WebGL. For simplicity, we use static images of wind data and the map background. The image
+      below consists of four tiles of wind data, stitched together to create a larger image. In the next example, we
+      will use WebGL to render this data together with our background map.
     </p>
 
     <Image id="wind-data-image" src={wind} alt="Raw wind data from tile server" loading="eager" />
@@ -33,21 +33,21 @@ import renderWindDataByWindSpeed from '../RenderWindExample/shaders/RenderWindDa
     <h2>Render raw wind data with WebGL</h2>
     <p>
       Setting up WebGL demands some boilerplate code, which we will not provide in these simplified examples. If you are
-      unfamiliar with WebGL, we recommend visiting <a href="https://webglfundamentals.org/">WebGL Fundamentals</a> to get
-      a grasp of the basics. After creating a canvas element and setting up the WebGL context, we can start creating our
-      shaders.
+      unfamiliar with WebGL, we recommend visiting <a href="https://webglfundamentals.org/">WebGL Fundamentals</a> to understand
+      the basics. After creating a canvas element and setting up the WebGL context, we can start creating our shaders.
     </p>
 
     <h3>Vertex shader</h3>
     <Code lang="glsl" code={genericVertexShader.replaceAll('///', '//')} wrap={true} />
     <p>A simple vertex shader whose sole purpose is to provide our fragment shader with the texture coordinates.</p>
+
     <h3>Fragment shader</h3>
     <Code lang="glsl" code={renderRawWindData.replaceAll('///', '//')} wrap={true} />
     <p>
-      The fragment shader gets the texture coordinates (vTexCoord) to look up which color this coordinate represents in
-      both the wind data and our background map. As a simple way of blending these colors, we multiply them by each
-      other.
+      The fragment shader uses vTexCoord to sample colors from both the wind data and background map. As a simple way of
+      blending these colors, we multiply them by each other.
     </p>
+
     <h3>Output</h3>
     <p>This is the result that is drawn to our canvas element.</p>
     <canvas id="wind-canvas" data-initial-index={INITIAL_WIND_INDEX + 1}></canvas>
@@ -58,8 +58,9 @@ import renderWindDataByWindSpeed from '../RenderWindExample/shaders/RenderWindDa
       the R and G channels of the image. To make it more readable, we need to make some changes in the fragment shader.
       The vertex shader will remain the same.
     </p>
+
     <p id="wind-example-text">But first, we can create the gradient we want to use.</p>
-    <p>We don't need to render this gradient to the screen; it is simply done to visualize the example.</p>
+    <p>This gradient does not need to be rendered on the screen; it is only for visualization.</p>
 
     <h3>Fragment shader changes</h3>
     <p>
@@ -75,11 +76,12 @@ import renderWindDataByWindSpeed from '../RenderWindExample/shaders/RenderWindDa
     </p>
 
     <p>
-      As briefly mentioned, the wind data only contains a directional vector, stored in the R and G channels of the
-      image. So in this example, we first get the direction of the wind, then calculate the length of the vector to get
-      the speed. We then normalize the speed and use it as a lookup in our color gradient. The color gradient moves from
-      left to right, so we send the normalized speed as the x value.
+      As mentioned earlier, the wind data only contains a directional vector, stored in the R and G channels of the
+      image. In this example, we first get the direction of the wind, then calculate the length of the vector to get the
+      speed. We normalize the speed and use it to index the color gradient. The color gradient is mapped from left (low
+      speed) to right (high speed), so we send the normalized speed as the x value.
     </p>
+
     <Code lang="glsl" code={renderWindDataByWindSpeed.replaceAll('///', '//')} wrap={true} />
 
     <h3>Output</h3>

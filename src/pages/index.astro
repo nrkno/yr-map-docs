@@ -2,16 +2,17 @@
 import Image from 'astro/components/Image.astro';
 import temperature from '../../public/temperature.png';
 import wind from '../../public/wind.png';
+import leaflet from '../../public/leaflet.png';
 import Main from '../layouts/Main.astro';
 ---
 
 <Main>
   <section class="intro-section">
-    <h1>Documentation on Using Tile Data from MET</h1>
+    <h1>Visualizing MET Tile Data</h1>
     <p>
-      This documentation provides examples of how to use WebGL shaders to visualize temperature and wind data fetched
-      from a tile server. Each example demonstrates the process of rendering the data using static images and WebGL
-      shaders.
+      This documentation provides examples of how to visualize temperature and wind data from MET's tile server. Two
+      examples use WebGL for rendering data with shaders, while the third demonstrates rendering raw wind data within a
+      Leaflet <code>GridLayer</code> using a 2D canvas.
     </p>
   </section>
 
@@ -19,8 +20,11 @@ import Main from '../layouts/Main.astro';
     <div class="example">
       <a href={`${import.meta.env.BASE_URL}/wind`}>
         <div class="example-content">
-          <Image src={wind} alt="Wind Example" loading="eager" />
-          <h2>Wind</h2>
+          <Image class="example-image" src={wind} alt="Wind data visualization using WebGL" loading="eager" />
+          <div class="example-text">
+            <h2>Wind</h2>
+            <p>WebGL-rendered wind data visualization.</p>
+          </div>
         </div>
       </a>
     </div>
@@ -28,8 +32,33 @@ import Main from '../layouts/Main.astro';
     <div class="example">
       <a href={`${import.meta.env.BASE_URL}/temperature`}>
         <div class="example-content">
-          <Image src={temperature} alt="Temperature Example" loading="eager" />
-          <h2>Temperature</h2>
+          <Image
+            class="example-image"
+            src={temperature}
+            alt="Temperature data visualization using WebGL"
+            loading="eager"
+          />
+          <div class="example-text">
+            <h2>Temperature</h2>
+            <p>WebGL-rendered temperature data visualization.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="example">
+      <a href={`${import.meta.env.BASE_URL}/map`}>
+        <div class="example-content">
+          <Image
+            src={leaflet}
+            class="example-image example-image--leaflet"
+            alt="Leaflet example rendering wind data"
+            loading="eager"
+          />
+          <div class="example-text">
+            <h2>Leaflet Example</h2>
+            <p>Rendering raw wind data in a Leaflet <code>GridLayer</code> using a 2D canvas.</p>
+          </div>
         </div>
       </a>
     </div>
@@ -81,10 +110,18 @@ import Main from '../layouts/Main.astro';
       }
     }
 
-    .example-content img {
+    .example-image {
       height: 150px;
       width: 100%;
       object-fit: cover;
+    }
+    .example-text {
+      border-top: 1px solid darkgrey;
+      min-height: 100px;
+    }
+
+    .example-image--leaflet {
+      object-fit: scale-down;
     }
 
     .example h2 {

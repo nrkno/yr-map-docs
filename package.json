@@ -12,8 +12,10 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@types/leaflet": "^1.9.16",
     "astro": "^5.1.7",
-    "axios": "^1.7.9"
+    "axios": "^1.7.9",
+    "leaflet": "^1.9.4"
   },
   "devDependencies": {
     "@astrojs/node": "^9.0.1",
