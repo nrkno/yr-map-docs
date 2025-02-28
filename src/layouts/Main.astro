@@ -1,4 +1,12 @@
+---
+import { Image } from 'astro:assets';
+import yrLogo from '../../public/yr.png';
+---
+
 <body>
+  <a aria-label="Home" class="yr-logo" href={`${import.meta.env.BASE_URL}`}>
+    <Image src={yrLogo} alt="Yr logo" />
+  </a>
   <div class="main">
     <slot />
   </div>
@@ -25,5 +33,11 @@
 
   .main {
     margin: 0 15%;
+  }
+
+  .yr-logo {
+    position: absolute;
+    left: 5%;
+    top: 5%;
   }
 </style>
