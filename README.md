@@ -1,88 +1,116 @@
 # Documentation on Using Tile Data from MET
 
-This repository documents how we use tile server data from MET to visualize temperature and wind data using WebGL shaders. The docs are deployed at [https://nrkno.github.io/yr-map-docs/](https://nrkno.github.io/yr-map-docs/). 
+This repository documents how we use tile server data from MET to visualize temperature and wind data using WebGL shaders. The docs are deployed at [https://nrkno.github.io/yr-map-docs/](https://nrkno.github.io/yr-map-docs/).
 
-These examples does not go in depth on how to set up WebGl in the client, wich is why the repository is public so those that are interested can see how we have done it. 
+These examples do not go in-depth on how to set up WebGL in the client, which is why the repository is public—so those who are interested can see how we have done it.
 
-Note that this is done using WebGl 1, and with no helper library for the WebGl part. If we sould rewrite our map code on Yr now, we would have used WebGl 2, and probably a helper library aswell to make things a bit more readable.
+Note that this is done using WebGL 1, without a helper library for the WebGL part. If we were to rewrite our map code on Yr now, we would use WebGL 2 and probably a helper library as well to make things more readable.
 
-**You are welcome to clone this repo locally if you want, just follow the guide at the bottom of this page.**
+**You are welcome to clone this repo locally if you want—just follow the guide at the bottom of this page.**
 
-## Cloning and running the repository
+## Cloning and Running the Repository
 
-You are welcome to clone this repository and play around with the shader code. We have used Astro as a framework to generate the static sites we deploy, but you should not have to touch any of the Astro components unless you want to.
+You are welcome to clone this repository and experiment with the shader code. We have used Astro as a framework to generate the static sites we deploy, but you should not need to modify any Astro components unless you want to.
 
 1. Clone the repository:
 
-`git clone https://github.com/nrkno/yr-map-docs.git`
+   ```sh
+   git clone https://github.com/nrkno/yr-map-docs.git
+   ```
 
-2. Install dependencies
+2. Install dependencies:
 
-`npm install`
+   ```sh
+   npm install
+   ```
 
-3. Run dev server
+3. Run the development server:
 
-`npm run dev`
+   ```sh
+   npm run dev
+   ```
 
-## Run production/build
+## Running Production/Build
 
-`npm run build`
+```sh
+npm run build
+npm run preview
+```
 
-`npm run preview`
+## Modifying the Code
 
+We recommend using `npm run dev` to enable hot module reloading, allowing you to see changes on the fly.
 
-## Changing the code
+## Customizing the Color Gradient
 
-We recommend just using `npm run dev` so you have hot module reloading and can see the changes you make on the fly.
+The gradients used for the temperature and wind heatmaps are defined in [colors.ts](./src/helpers/colors.ts). In the same file, you can also find the function that creates the `CanvasElement` and applies the gradient to it. We choose to render the `CanvasElement` on the screen, but that is not necessary.
 
-## Make your own color gradient
+You can start by modifying some of the color values in either the wind or temperature definitions to see the changes in the map.
 
-The gradients used for the temperature and wind heatmap is defined in [colors.ts](./src/helpers/colors.ts). In the same file you also see the function that is creating the CanvasElement and adding the gradient to it. We choose to render the CanvasElement on the screen, but that is not necessary.
-
-You could start by changing some of the color values in either the wind or temperature definitions and see the changes in the map.
-
-## Making changing to the shaders
+## Modifying the Shaders
 
 ### Wind
-Since this site is made using astro, the component for setting up the WebGl Context, creating the program and applying the shaders is found in [RenderWindExample](./src/components/RenderWindExample/RenderWindExample.astro). Note that this only contains a `<script>` tag, just with typescript support. Mentioning this to avoid any confusion; all WebGl Context, programs, shaders etc is loaded in plain javascript. If you run `npm run build` you can see the javascript bundle for it. 
+
+Since this site is built using Astro, the component for setting up the WebGL context, creating the program, and applying the shaders is found in [RenderWindExample](./src/components/RenderWindExample/RenderWindExample.astro). This file contains only a `<script>` tag with TypeScript support.
+
+To clarify: all WebGL context, programs, shaders, etc., are loaded in plain JavaScript. If you run `npm run build`, you can see the JavaScript bundle for it.
 
 #### Shaders
-In the [shaders folder](./src/components/RenderWindExample/shaders/) we have three shaders; one vertex shader to set up the vertices where we draw the pixels in, and two fragment shaders; one for the example where we render the raw data together with the background map, and one where we apply our own gradient. 
 
-The output of the fragment shader is `gl_FragColor`, so if you change this value you can see the result on screen. 
+In the [shaders folder](./src/components/RenderWindExample/shaders/), we have three shaders:
+
+- A vertex shader to define the vertices where pixels are drawn.
+- Two fragment shaders:
+  - One renders the raw data along with the background map.
+  - One applies our custom gradient.
+
+The output of the fragment shader is `gl_FragColor`. If you modify this value, you will see the result on screen.
 
 ### Temperature
 
-Since this site is made using astro, the component for setting up the WebGl Context, creating the program and applying the shaders is found in [RenderTemperatureExample](./src/components/RenderTemperatureExample/RenderTemperatureExample.astro). Note that this only contains a `<script>` tag, just with typescript support. Mentioning this to avoid any confusion; all WebGl Context, programs, shaders etc is loaded in plain javascript. If you run `npm run build` you can see the javascript bundle for it. 
+Like the wind example, the component for setting up the WebGL context, creating the program, and applying the shaders is found in [RenderTemperatureExample](./src/components/RenderTemperatureExample/RenderTemperatureExample.astro). Again, this file only contains a `<script>` tag with TypeScript support, and all WebGL-related logic is handled in plain JavaScript.
 
-### Shaders
-In the [shaders folder](./src/components/RenderTemperatureExample/shaders/) we have three shaders; one vertex shader to set up the vertices where we draw the pixels in, and two fragment shaders; one for the example where we render the raw data together with the background map, and one where we apply our own gradient. 
+#### Shaders
 
-The output of the fragment shader is `gl_FragColor`, so if you change this value you can see the result on screen. 
+In the [shaders folder](./src/components/RenderTemperatureExample/shaders/), we have three shaders:
 
+- A vertex shader to set up the vertices where pixels are drawn.
+- Two fragment shaders:
+  - One renders the raw data along with the background map.
+  - One applies our custom gradient.
+
+As with the wind example, modifying `gl_FragColor` will change the output visible on screen.
 
 ## WebGL Resources
 
-We recommend [WebGlFundamentals](https://webglfundamentals.org/), or [WebGl2Fundamentals](https://webgl2fundamentals.org/) (for WebGl2) as good starting points for learning WebGl.
+We recommend [WebGL Fundamentals](https://webglfundamentals.org/) and [WebGL2 Fundamentals](https://webgl2fundamentals.org/) (for WebGL 2) as good starting points for learning WebGL.
 
-One of the contributers on WebGlFundamentals also made a tiny helper library called [TWGL](https://twgljs.org/). 
+One of the contributors to WebGL Fundamentals also created a small helper library called [TWGL](https://twgljs.org/).
 
-In the creators own words: 
+In the creator's own words:
+
 > This library's sole purpose is to make using the WebGL API less verbose.
 
-## Creating one big image based on multiple tiles
+## Generating a Single Image from Multiple Tiles
 
-In addition to the boilerplate scripts we get from using Astro as a framework, we have added a script called `generate-static-tile`. This will use the [options](./scripts/options.ts) to generate one static tile covering the defined bounds, using the specified zoom-level. 
+In addition to the boilerplate scripts provided by Astro, we have added a script called `generate-static-tile`. This script uses the [options](./scripts/options.ts) to generate a single static tile covering the defined bounds using the specified zoom level.
 
-Based on the bounds we will find all the tiles needed, download these and save them temporarily in `scripts/temp` - and at the end we will stitch these tiles together to make one big picture that we use as our textures in WebGl. 
+The script:
 
-If you are to use this in an actual map context, you will need to take into account that the bounds of all the tiles might be larger than the bounds of what the map is showing - usually by multiplying with a matrix that is provided by the map library you choose to use. 
+- Identifies the required tiles based on the given bounds.
+- Downloads them and temporarily stores them in `scripts/temp`.
+- Stitches them together into a single large image, which we use as textures in WebGL.
 
-### Changing the bounds and generating your own tiles
+If you want to use this in an actual map context, be aware that the bounds of all the tiles might be larger than the map's visible area. This is usually handled by multiplying with a transformation matrix provided by your chosen map library.
 
-We will **not provide** a tile server for the background map. Since these are generated as static resources on demand, and can potentially cause a lot of stress on our servers. `WIND_SOURCE` and
-`TEMPERATURE_SOURCE` is provided by MET - these are the endpoints that contains the tile with the actual weather data, and are free to use as you please.
+### Modifying Bounds and Generating Custom Tiles
 
-So if you want to play around with this part of the code you need to either set up your own raster tile server, or find one that is open and free. Please note that many of the free services does not allow downloading tiles in a bundle. ince we are using  plain multiplying colors as a way of blending in the shaders, our background is mainly white except for borders and coastlines. If you use raster tiles with more color in them the result will look different. Then you could look up other ways to blend colors to get the result you want. 
+We **do not provide** a tile server for the background map. Since these tiles are generated as static resources on demand, serving them could put excessive strain on our servers.
 
-The output paths are defined in [options](./scripts/options.ts) aswell - and is currently set to the `public` folder that is used by Astro.
+`WIND_SOURCE` and `TEMPERATURE_SOURCE` are provided by MET—these endpoints contain the weather data tiles and are free to use.
+
+If you want to experiment with this part of the code, you will need to set up your own raster tile server or find an open and free one. Be aware that many free services do not allow bulk tile downloads.
+
+Since we use simple color multiplication for blending in the shaders, our background is mainly white except for borders and coastlines. If you use raster tiles with more colors, the result will look different. You may need to explore alternative blending methods to achieve your desired result.
+
+The output paths are defined in [options.ts](./scripts/options.ts) and are currently set to the `public` folder used by Astro.
